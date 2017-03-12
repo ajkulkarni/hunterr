@@ -80,6 +80,21 @@
 			<artifactId>aws-java-sdk-dynamodb</artifactId>
 			<version>1.9.40</version>
 		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>2.25.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-jackson</artifactId>
+			<version>2.26-b02</version>
+		</dependency>
+		<dependency>
+			<groupId>com.owlike</groupId>
+			<artifactId>genson</artifactId>
+			<version>1.4</version>
+		</dependency>
 	</dependencies>
 
 	<properties>
