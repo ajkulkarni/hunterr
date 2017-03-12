@@ -22,7 +22,7 @@ public class HunterrSpeechlet implements Speechlet{
 
 	    private HunterrResponseUtil responseUtil;
 
-	    private SkillContext skillContext;
+	    private SkillContext skillContext = new SkillContext();;
 	    @Override
 		public void onSessionStarted(SessionStartedRequest request, Session session) throws SpeechletException {
 			// TODO Auto-generated method stub
