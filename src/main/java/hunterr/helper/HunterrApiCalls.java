@@ -35,7 +35,7 @@ public class HunterrApiCalls {
 		
 		String response = client.target("http://api.indeed.com/ads")
 				.path("apisearch")
-				.queryParam("publisher", "2529823375038480")
+				.queryParam("publisher", "007")
 				.queryParam("q", companyCondition + "title:" + title)
 				.queryParam("l", city)
 				.queryParam("jt", jobType)
@@ -66,11 +66,11 @@ public class HunterrApiCalls {
 
 		try {
 			HttpPost request = new HttpPost(
-					"https://sheets.googleapis.com/v4/spreadsheets/1JLzHOBy-JLkdWbDdwgUNKQDxkC5q7RC2MAw3M6GsPLU/values/Sheet1!A1:F1:append?valueInputOption=USER_ENTERED");
+					"https://sheets.googleapis.com/v4/spreadsheets/007/values/Sheet1!A1:F1:append?valueInputOption=USER_ENTERED");
 			StringEntity params = new StringEntity(jsonObject.toString());
 			request.addHeader("content-type", "application/json");
 			request.addHeader("Authorization",
-					"Bearer ya29.GlsMBILl4Ko-2bAn6_fssvq4fnDfdRBJd6zD3LuP2E4cRrazTh10GuZQkr_TBb1cTZarMCiPO3mRnnG3dxmv2OJ6e9hfdoWwFfT82JGLokXjQSf8OX012meIcrdS");
+					"Bearer 007");
 			request.setEntity(params);
 			httpClient.execute(request);
 		} catch (Exception ex) {
@@ -80,10 +80,4 @@ public class HunterrApiCalls {
 		}
 
 	}
-
-	/*
-	 * public static void main(String args[]) throws IOException {
-	 * searchJobs("seattle", "microsoft", "software engineer", "fulltime", 30);
-	 * writeToSheet(); }
-	 */
 }
