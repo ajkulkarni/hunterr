@@ -5,9 +5,9 @@ import javax.ws.rs.client.ClientBuilder;
 import com.owlike.genson.Genson;
 
 public class HunterrApiCalls {
-	Genson genson = new Genson();
+	static Genson genson = new Genson();
 	
-	public Job[] searchJobs(String city, String company, String title, String jobType, int days) {
+	public static Job[] searchJobs(String city, String company, String title, String jobType, int days) {
 		Client client = ClientBuilder.newClient();
 		String response = client.target("http://api.indeed.com/ads")
 				.path("apisearch")

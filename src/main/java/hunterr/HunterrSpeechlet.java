@@ -43,36 +43,32 @@ public class HunterrSpeechlet implements Speechlet {
 		
 		if ("SearchJobIntent".equals(intent.getName())) {
 			return HunterrResponseUtil.getStartJobTitleResponse(session);
+		} else if ("ResponseIntent".equals(intent.getName())) {
+			String lastQuestion = (String)session.getAttribute("lastQuestion");
+			String response;
 			
-
+			switch(lastQuestion) {
+				case "Job Title":
+					response = intent.getSlot("jobtitle").getValue();
+					return HunterrResponseUtil.getCompanyResponse(session, response);
+				case "Company":
+					response = intent.getSlot("company").getValue();
+					return HunterrResponseUtil.getLocationResponse(session, response);
+				case "Location": 
+					response = intent.getSlot("locationcity").getValue();
+					return HunterrResponseUtil.getJobTypeResponse(session, response);
+				default:
+					response = intent.getSlot("jobtype").getValue();
+					return HunterrResponseUtil.getStopIntentResponse(session, response);
+			}
 		} else if ("AMAZON.YesIntent".equals(intent.getName())) {
 			return HunterrResponseUtil.getYesIntentResponse(session);
+		} else if ("AMAZON.NoIntent".equals(intent.getName())) {
+			return HunterrResponseUtil.getNoIntentResponse(session);
 
 		} else if ("AMAZON.StopIntent".equals(intent.getName())) {
 			return HunterrResponseUtil.getStopIntentResponse(session);
 
-		} else if ("ResponseIntent".equals(intent.getName())) {
-			String lastQuestion = (String)session.getAttribute("lastQuestion");
-			String response;
-			if(lastQuestion.equals("Location")) {
-				response = intent.getSlot("locationcity").getValue();
-				if(response == null || response.equals("") || response.equals("null")) response = intent.getSlot("locationstate").getValue();
-			} else {
-				response = intent.getSlot("response").getValue();
-			}
-			session.setAttribute(lastQuestion, response);
-			switch(lastQuestion) {
-				case "Job Title": return HunterrResponseUtil.getCompanyResponse(session, response);
-				case "Company": return HunterrResponseUtil.getLocationResponse(session, response);
-				case "Location": return HunterrResponseUtil.getJobTypeResponse(session, response);
-				default:
-					/*String result = "";
-					for(Map.Entry<String, Object> entry: session.getAttributes().entrySet()) {
-						String value = entry.getValue().toString();
-						result += value+", ";
-					}*/
-					return HunterrResponseUtil.getStopIntentResponse(session);
-			}
 		} else {
 			throw new IllegalArgumentException("Unrecognized intent: " + intent.getName());
 		}

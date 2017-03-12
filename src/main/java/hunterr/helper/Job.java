@@ -1,6 +1,6 @@
 package hunterr.helper;
 
-class Job {
+public class Job {
 	String company;
 	String jobtitle;
 	String formattedRelativeTime;
