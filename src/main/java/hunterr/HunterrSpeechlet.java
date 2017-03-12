@@ -13,17 +13,13 @@ import com.amazon.speech.speechlet.Speechlet;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 
-import scorekeeper.ScoreKeeperSpeechlet;
-import scorekeeper.SkillContext;
 
 public class HunterrSpeechlet implements Speechlet {
-	private static final Logger log = LoggerFactory.getLogger(ScoreKeeperSpeechlet.class);
+	private static final Logger log = LoggerFactory.getLogger(HunterrSpeechlet.class);
 
 	// private AmazonDynamoDBClient amazonDynamoDBClient;
 
 	private HunterrResponseUtil responseUtil;
-
-	private SkillContext skillContext;
 
 	@Override
 	public void onSessionStarted(SessionStartedRequest request, Session session) throws SpeechletException {
@@ -33,7 +29,6 @@ public class HunterrSpeechlet implements Speechlet {
 		// if user said a one shot command that triggered an intent event,
 		// it will start a new session, and then we should avoid speaking too
 		// many words.
-		skillContext.setNeedsMoreHelp(false);
 	}
 
 	@Override
