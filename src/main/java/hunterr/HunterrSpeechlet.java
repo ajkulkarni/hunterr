@@ -1,12 +1,9 @@
 package hunterr;
 
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazon.speech.slu.Intent;
-import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.LaunchRequest;
 import com.amazon.speech.speechlet.Session;
@@ -15,7 +12,6 @@ import com.amazon.speech.speechlet.SessionStartedRequest;
 import com.amazon.speech.speechlet.Speechlet;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
-
 
 public class HunterrSpeechlet implements Speechlet {
 	private static final Logger log = LoggerFactory.getLogger(HunterrSpeechlet.class);
@@ -38,40 +34,67 @@ public class HunterrSpeechlet implements Speechlet {
 	public SpeechletResponse onIntent(IntentRequest request, Session session) throws SpeechletException {
 		// TODO Auto-generated method stub
 		log.info("onIntent requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
-		
+
 		Intent intent = request.getIntent();
-		
+
 		if ("SearchJobIntent".equals(intent.getName())) {
 			return HunterrResponseUtil.getStartJobTitleResponse(session);
 		} else if ("ResponseIntent".equals(intent.getName())) {
-			String lastQuestion = (String)session.getAttribute("lastQuestion");
-			String response;
-			
-			switch(lastQuestion) {
-				case "Job Title":
-					response = intent.getSlot("jobtitle").getValue();
-					return HunterrResponseUtil.getCompanyResponse(session, response);
-				case "Company":
-					response = intent.getSlot("company").getValue();
-					return HunterrResponseUtil.getLocationResponse(session, response);
-				case "Location": 
-					response = intent.getSlot("locationcity").getValue();
-					return HunterrResponseUtil.getJobTypeResponse(session, response);
-				default:
-					response = intent.getSlot("jobtype").getValue();
-					return HunterrResponseUtil.getStopIntentResponse(session, response);
-			}
+			return processQuestion(intent, session, true);
 		} else if ("AMAZON.YesIntent".equals(intent.getName())) {
 			return HunterrResponseUtil.getYesIntentResponse(session);
+
 		} else if ("AMAZON.NoIntent".equals(intent.getName())) {
-			return HunterrResponseUtil.getNoIntentResponse(session);
+			return processQuestion(intent, session, false);
 
 		} else if ("AMAZON.StopIntent".equals(intent.getName())) {
 			return HunterrResponseUtil.getStopIntentResponse(session);
-
+		} else if ("AMAZON.HelpIntent".equals(intent.getName())) {
+			return HunterrResponseUtil.getHelpResponse(session);
+		} else if ("RepeatSearchJobIntent".equals(intent.getName())) {
+			String response = intent.getSlot("jobtitle").getValue();
+			return HunterrResponseUtil.getStopIntentResponse(session);
 		} else {
 			throw new IllegalArgumentException("Unrecognized intent: " + intent.getName());
 		}
+	}
+
+	private SpeechletResponse processQuestion(Intent intent, Session session, boolean b) {
+		String response;
+		String lastQuestion = (String) session.getAttribute("lastQuestion");
+		switch (lastQuestion) {
+			case "Job Title":
+				if(b) response = intent.getSlot("jobtitle").getValue();
+				else response = "skip";
+				return HunterrResponseUtil.getCompanyResponse(session, response);
+			case "Company":
+				if(b) response = intent.getSlot("company").getValue();
+				else response = "skip";
+				return HunterrResponseUtil.getLocationResponse(session, response);
+			case "Location":
+				if(b) {
+					response = "";
+					String city = intent.getSlot("locationcity").getValue();
+					if (!HunterrResponseUtil.isNull(city)) {
+						response = city;
+					}
+			
+					String state = intent.getSlot("locationstate").getValue();
+					if (!HunterrResponseUtil.isNull(state)) {
+						response += " " + state;
+					}
+				}
+				else response = "skip";
+				return HunterrResponseUtil.getJobTypeResponse(session, response);
+			case "Job Type":
+				if(b) response = intent.getSlot("jobtype").getValue();
+				else response = "skip";
+				return HunterrResponseUtil.getHistoryResponse(session, response);
+			default:
+				if(b) response = intent.getSlot("history").getValue();
+				else response = "skip";
+				return HunterrResponseUtil.getStopIntentResponse(session, response);
+			}
 	}
 
 	@Override
@@ -88,5 +111,4 @@ public class HunterrSpeechlet implements Speechlet {
 		log.info("onSessionEnded requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
 		// any cleanup logic goes here
 	}
-
 }
