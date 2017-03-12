@@ -29,4 +29,10 @@ public class HunterrResponseUtil {
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
 	}
 
+	public static SpeechletResponse getSearchJobIntentResponse(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 }
