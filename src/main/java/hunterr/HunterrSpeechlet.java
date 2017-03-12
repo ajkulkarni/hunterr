@@ -1,9 +1,12 @@
 package hunterr;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazon.speech.slu.Intent;
+import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.LaunchRequest;
 import com.amazon.speech.speechlet.Session;
@@ -35,11 +38,41 @@ public class HunterrSpeechlet implements Speechlet {
 	public SpeechletResponse onIntent(IntentRequest request, Session session) throws SpeechletException {
 		// TODO Auto-generated method stub
 		log.info("onIntent requestId={}, sessionId={}", request.getRequestId(), session.getSessionId());
-
+		
 		Intent intent = request.getIntent();
+		
 		if ("SearchJobIntent".equals(intent.getName())) {
-			return HunterrResponseUtil.getSearchJobIntentResponse(session);
+			return HunterrResponseUtil.getStartJobTitleResponse(session);
+			
 
+		} else if ("AMAZON.YesIntent".equals(intent.getName())) {
+			return HunterrResponseUtil.getYesIntentResponse(session);
+
+		} else if ("AMAZON.StopIntent".equals(intent.getName())) {
+			return HunterrResponseUtil.getStopIntentResponse(session);
+
+		} else if ("ResponseIntent".equals(intent.getName())) {
+			String lastQuestion = (String)session.getAttribute("lastQuestion");
+			String response;
+			if(lastQuestion.equals("Location")) {
+				response = intent.getSlot("locationcity").getValue();
+				if(response == null || response.equals("") || response.equals("null")) response = intent.getSlot("locationstate").getValue();
+			} else {
+				response = intent.getSlot("response").getValue();
+			}
+			session.setAttribute(lastQuestion, response);
+			switch(lastQuestion) {
+				case "Job Title": return HunterrResponseUtil.getCompanyResponse(session, response);
+				case "Company": return HunterrResponseUtil.getLocationResponse(session, response);
+				case "Location": return HunterrResponseUtil.getJobTypeResponse(session, response);
+				default:
+					/*String result = "";
+					for(Map.Entry<String, Object> entry: session.getAttributes().entrySet()) {
+						String value = entry.getValue().toString();
+						result += value+", ";
+					}*/
+					return HunterrResponseUtil.getStopIntentResponse(session);
+			}
 		} else {
 			throw new IllegalArgumentException("Unrecognized intent: " + intent.getName());
 		}

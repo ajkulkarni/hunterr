@@ -24,7 +24,7 @@ public class HunterrSpeechletRequestStreamHandler extends SpeechletRequestStream
 		 * in this Set.
 		 */
 		supportedApplicationIds = new HashSet<String>();
-		// supportedApplicationIds.add("amzn1.echo-sdk-ams.app.[unique-value-here]");
+		supportedApplicationIds.add("amzn1.ask.skill.5380372b-9fc1-4053-b8c7-f679370b432e");
 	}
 
 	public HunterrSpeechletRequestStreamHandler() {
