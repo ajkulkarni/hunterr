@@ -1,5 +1,7 @@
 package hunterr;
 
+import java.io.IOException;
+
 import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.LaunchRequest;
 import com.amazon.speech.speechlet.Session;
@@ -36,7 +38,7 @@ public class HunterrResponseUtil {
 	}
 
 	public static SpeechletResponse getYesIntentResponse(Session session) {
-		String speechText = "Great! Now what?";
+		String speechText = "Great! Is there more job hunting to do today?";
 
 		return generateAskResponse(speechText);
 	}
@@ -45,9 +47,13 @@ public class HunterrResponseUtil {
 		// TODO Auto-generated method stub
 		String speechText = "";
 		
-		Job[] joblist;
-		joblist = HunterrApiCalls.searchJobs((String)session.getAttribute("Location"), (String)session.getAttribute("Company"), (String)session.getAttribute("Job Title"), (String)session.getAttribute("Job Type"), (String)session.getAttribute("History"));
-		
+		int joblistCount = HunterrApiCalls.searchJobs((String)session.getAttribute("Location"), (String)session.getAttribute("Company"), (String)session.getAttribute("Job Title"), (String)session.getAttribute("Job Type"), (String)session.getAttribute("History"));
+		try {
+			HunterrApiCalls.writeToSheet();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		//String speechText = "Great Job Today! Good-bye";
 		
 		String jobType = "";
@@ -64,11 +70,11 @@ public class HunterrResponseUtil {
 			speechText += " in "+(String)session.getAttribute("Location");
 		}
 		
-		if(!isNull((String)session.getAttribute("History")) || ((String) session.getAttribute("History")).equalsIgnoreCase("0")) {
+		if(!isNull((String)session.getAttribute("History")) || !((String) session.getAttribute("History")).equalsIgnoreCase("0")) {
 			speechText += " posted in the last "+((String)session.getAttribute("History"))+" days";
 		}
 		
-		speechText += " . Based on your search I found " + joblist.length + " jobs. Good-Bye!";
+		speechText += " . Based on your search I found " + joblistCount + " jobs. Good-Bye!";
 		return generateTellResponse(speechText);
 	}
 
@@ -112,8 +118,8 @@ public class HunterrResponseUtil {
 		// TODO Auto-generated method stub
 		String speechText = result;
 		session.setAttribute((String)session.getAttribute("lastQuestion"), result);
-		Job[] joblist;
-		joblist = HunterrApiCalls.searchJobs((String)session.getAttribute("Location"), (String)session.getAttribute("Company"), (String)session.getAttribute("Job Title"), (String)session.getAttribute("Job Type"), (String)session.getAttribute("History"));
+		
+		int joblistCount = HunterrApiCalls.searchJobs((String)session.getAttribute("Location"), (String)session.getAttribute("Company"), (String)session.getAttribute("Job Title"), (String)session.getAttribute("Job Type"), (String)session.getAttribute("History"));
 		
 		//String speechText = "Great Job Today! Good-bye";
 		
@@ -131,12 +137,16 @@ public class HunterrResponseUtil {
 			speechText += " in "+(String)session.getAttribute("Location");
 		}
 		
-		if(!isNull((String)session.getAttribute("History")) || ((String) session.getAttribute("History")).equalsIgnoreCase("0")) {
+		if(!isNull((String)session.getAttribute("History")) || !(((String) session.getAttribute("History")).equalsIgnoreCase("0"))) {
 			speechText += " posted in the last "+((String)session.getAttribute("History"))+" days";
 		}
 		
-		speechText += " . Based on your search I found " + joblist.length + " jobs. Good-Bye!";
-		return generateTellResponse(speechText);
+		speechText += " . Based on your search I found " + joblistCount + " jobs.";
+		
+		session.setAttribute("lastQuery", "writeToFile");
+		
+		speechText += " Shall I write these results to your job tracker?";
+		return generateAskResponse(speechText);
 	}
 
 	public static SpeechletResponse getCompanyResponse(Session session, String response) {
@@ -178,7 +188,7 @@ public class HunterrResponseUtil {
 		return SpeechletResponse.newAskResponse(speech, reprompt);
 	}
 	
-	private static SpeechletResponse generateTellResponse(String speechText) {
+	public static SpeechletResponse generateTellResponse(String speechText) {
 		// Create the plain text output.
 		PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
 		speech.setText(speechText);

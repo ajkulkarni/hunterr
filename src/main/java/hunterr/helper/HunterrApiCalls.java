@@ -20,23 +20,23 @@ public class HunterrApiCalls {
 	static Genson genson = new Genson();
 	static Job[] jobs;
 	
-	public static Job[] searchJobs(String city, String company, String title, String jobType, String days) {
+	public static int searchJobs(String city, String company, String title, String jobType, String days) {
 
 		Client client = ClientBuilder.newClient();
 
-		
-		if(HunterrResponseUtil.isNull(company) || company.equalsIgnoreCase("skip")) {
-			company = "";
+		String companyCondition = "";
+		if(!(HunterrResponseUtil.isNull(company) || company.equalsIgnoreCase("skip"))) {
+			companyCondition = "company:" + company+ " ";
 		}
 		
 		if(days == null || days.equalsIgnoreCase("skip") || days.equalsIgnoreCase("0")) {
-			days = "7";
+			days = "30";
 		}
 		
 		String response = client.target("http://api.indeed.com/ads")
 				.path("apisearch")
 				.queryParam("publisher", "2529823375038480")
-				.queryParam("q", "company:" + company + " " + "title:" + title)
+				.queryParam("q", companyCondition + "title:" + title)
 				.queryParam("l", city)
 				.queryParam("jt", jobType)
 				.queryParam("fromage", Integer.parseInt(days))
@@ -48,7 +48,7 @@ public class HunterrApiCalls {
 
 		IndeedResponse iResponse = genson.deserialize(response, IndeedResponse.class);
 		jobs = iResponse.getResults();
-		return jobs;
+		return jobs.length;
 	}
 
 	public static void writeToSheet() throws IOException {
@@ -70,7 +70,7 @@ public class HunterrApiCalls {
 			StringEntity params = new StringEntity(jsonObject.toString());
 			request.addHeader("content-type", "application/json");
 			request.addHeader("Authorization",
-					"Bearer ya29.GlsMBMO9CM6jf4I2y6The0eu6EuRCh0L2otHt9a9apMEdV1VdRayvA85-Pqky2n6BMSzR7dh_d2Aj8lLP69RpH_33z_q03erFSVkmrciz-TsZiCnsrftKc8ZIVig");
+					"Bearer ya29.GlsMBILl4Ko-2bAn6_fssvq4fnDfdRBJd6zD3LuP2E4cRrazTh10GuZQkr_TBb1cTZarMCiPO3mRnnG3dxmv2OJ6e9hfdoWwFfT82JGLokXjQSf8OX012meIcrdS");
 			request.setEntity(params);
 			httpClient.execute(request);
 		} catch (Exception ex) {

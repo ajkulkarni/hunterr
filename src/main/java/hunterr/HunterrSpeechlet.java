@@ -1,5 +1,7 @@
 package hunterr;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +14,8 @@ import com.amazon.speech.speechlet.SessionStartedRequest;
 import com.amazon.speech.speechlet.Speechlet;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
+
+import hunterr.helper.HunterrApiCalls;
 
 public class HunterrSpeechlet implements Speechlet {
 	private static final Logger log = LoggerFactory.getLogger(HunterrSpeechlet.class);
@@ -38,21 +42,36 @@ public class HunterrSpeechlet implements Speechlet {
 		Intent intent = request.getIntent();
 
 		if ("SearchJobIntent".equals(intent.getName())) {
+			session.setAttribute("lastQuery", "");
 			return HunterrResponseUtil.getStartJobTitleResponse(session);
 		} else if ("ResponseIntent".equals(intent.getName())) {
 			return processQuestion(intent, session, true);
 		} else if ("AMAZON.YesIntent".equals(intent.getName())) {
+			if(((String)session.getAttribute("lastQuery")).equals("writeToFile")) {
+				try {
+					HunterrApiCalls.writeToSheet();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				session.setAttribute("lastQuery", "searchDone");
+			}
+			
 			return HunterrResponseUtil.getYesIntentResponse(session);
-
 		} else if ("AMAZON.NoIntent".equals(intent.getName())) {
+			if(((String)session.getAttribute("lastQuery")).equals("searchDone")) {
+				return HunterrResponseUtil.generateTellResponse("Alright! Later");
+			} else if(((String)session.getAttribute("lastQuery")).equals("writeToFile")) {
+				return HunterrResponseUtil.generateTellResponse("Alright! Later");
+			}
 			return processQuestion(intent, session, false);
-
 		} else if ("AMAZON.StopIntent".equals(intent.getName())) {
 			return HunterrResponseUtil.getStopIntentResponse(session);
 		} else if ("AMAZON.HelpIntent".equals(intent.getName())) {
 			return HunterrResponseUtil.getHelpResponse(session);
 		} else if ("RepeatSearchJobIntent".equals(intent.getName())) {
+			session.setAttribute("lastQuery", "");
 			String response = intent.getSlot("jobtitle").getValue();
+			session.setAttribute("Job Title", response);
 			return HunterrResponseUtil.getStopIntentResponse(session);
 		} else {
 			throw new IllegalArgumentException("Unrecognized intent: " + intent.getName());
